@@ -16,16 +16,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set Unity Editor Version
-        run: |
-          echo "Using Unity Editor version 6000.0.23f1"
-          echo "UNITY_VERSION=6000.0.23f1" >> $GITHUB_ENV
-
-      - name: Install Unity Editor
-        uses: game-ci/unity-installer@v2
-        with:
-          version: 6000.0.23f1
-
       - name: Create Unity License Directory
         run: mkdir -p ~/.local/share/unity3d/Unity
 
@@ -34,6 +24,13 @@ jobs:
           echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > ~/.local/share/unity3d/Unity/Unity_lic.ulf
           echo "Unity license file saved to ~/.local/share/unity3d/Unity/Unity_lic.ulf"
           ls -alh ~/.local/share/unity3d/Unity
+
+      - name: Install Unity 6
+        uses: unity-ci/docker@v1
+        with:
+          unityVersion: "6000.0.23f1" # Replace this with your Unity 6 version
+          workspace: ${{ github.workspace }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Debug Unity License File
         run: |
