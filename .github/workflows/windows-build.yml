@@ -1,36 +1,33 @@
-name: Build Windows
+name: Unity Build
 
 on:
   push:
     branches:
-      - builds # Trigger the workflow only on the `builds` branch
-  workflow_dispatch: # Allows manual triggers
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+
     steps:
+      # Checkout your code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Unity
-        uses: game-ci/unity-setup@v2
-        with:
-          unityVersion: 6000.0.23f1 # Replace with your Unity version
-          activationEmail: ${{ secrets.UNITY_EMAIL }}
-          activationPassword: ${{ secrets.UNITY_PASSWORD }}
-          activationLicense: ${{ secrets.UNITY_SERIAL }} # Leave empty for Personal
-
-      - name: Build project
+      # Set up Unity Builder
+      - name: Unity Builder
         uses: game-ci/unity-builder@v2
         with:
-          targetPlatform: StandaloneWindows64
-          projectPath: BrandVRtise # Your Unity project folder
-          buildName: BrandVRtise-Windows
-          versioning: Semantic
+          projectPath: . # Path to your Unity project
+          unityVersion: 6000.0.23f1 # Replace with your Unity version
+          targetPlatform: StandaloneWindows64 # Replace with your target platform (e.g., StandaloneWindows64, Android, WebGL, etc.)
 
-      - name: Upload Build Artifacts
+      # Optional: Upload build artifact
+      - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
-          name: WindowsBuild # Artifact name
-          path: build/StandaloneWindows64/ # Path to the build folder
+          name: Build
+          path: build/StandaloneWindows64/ # Replace with your build path
