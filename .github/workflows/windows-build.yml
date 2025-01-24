@@ -12,7 +12,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-        - name: Install Chocolatey
+      - name: Install Chocolatey
         run: |
           powershell -NoProfile -ExecutionPolicy Bypass -Command "& {
             if (!(Get-Command choco -ErrorAction SilentlyContinue)) {
@@ -22,7 +22,6 @@ jobs:
               Write-Host 'Chocolatey is already installed.';
             }
           }"
-      
 
       - name: Install Unity Hub
         run: |
@@ -30,15 +29,15 @@ jobs:
 
       - name: Install Unity Editor
         run: |
-          unityhub -- --headless install --version 2023.2.3f1 --module windows-mono
+          "C:\Program Files\Unity Hub\UnityHub.exe" -- --headless install --version 2023.2.3f1 --module windows-mono
 
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           echo "$env:UNITY_LICENSE" | base64 -d > Unity_lic.ulf
-          mkdir -p $env:LOCALAPPDATA\Unity
-          move Unity_lic.ulf $env:LOCALAPPDATA\Unity
+          mkdir -p "$env:LOCALAPPDATA\Unity"
+          move Unity_lic.ulf "$env:LOCALAPPDATA\Unity"
 
       - name: Build Windows Player
         run: |
