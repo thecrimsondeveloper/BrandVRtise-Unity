@@ -9,14 +9,20 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
+      # Step 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Unity
+      # Step 2: Install Unity Editor
+      - name: Download and Install Unity Editor
         run: |
-          choco install unityhub --yes
-          unityhub install 2023.2.3f1
+          # Download Unity Editor directly from the official Unity URL
+          curl -o UnitySetup.exe "https://download.unity3d.com/download_unity/8f7c6f9c4d5e/Windows64EditorInstaller/UnitySetup64.exe"
 
+          # Install Unity silently
+          start /wait UnitySetup.exe /S /D=C:\Unity
+
+      # Step 3: Activate Unity License
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -25,13 +31,14 @@ jobs:
           mkdir -p "%LOCALAPPDATA%\Unity"
           move Unity_lic.ulf "%LOCALAPPDATA%\Unity"
 
+      # Step 4: Build Windows Player
       - name: Build Windows Player
         run: |
-          Unity.exe \
-          -batchmode \
-          -quit \
-          -projectPath "$(pwd)" \
-          -buildTarget Win64 \
-          -customBuildTarget StandaloneWindows64 \
-          -customBuildPath "./Builds/Windows/MyGame.exe" \
-          -logFile /dev/stdout
+          C:\Unity\Editor\Unity.exe ^
+          -batchmode ^
+          -quit ^
+          -projectPath "$(pwd)" ^
+          -buildTarget Win64 ^
+          -customBuildTarget StandaloneWindows64 ^
+          -customBuildPath "./Builds/Windows/MyGame.exe" ^
+          -logFile ./unity-build.log
