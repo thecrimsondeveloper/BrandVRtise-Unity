@@ -10,14 +10,14 @@ jobs:
     name: Build Windows
     runs-on: ubuntu-latest
     container:
-      image: unityci/editor:windows-2023.2.3f1-android-3.0.0
+      image: unityci/editor:2023.2.3f1-base-0 # Use the Linux-compatible Unity editor image
 
     steps:
       # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Set up Unity license (replace with your actual base64 license)
+      # Activate Unity license
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -26,7 +26,7 @@ jobs:
           mkdir -p ~/.local/share/unity3d/Unity
           mv Unity_lic.ulf ~/.local/share/unity3d/Unity
 
-      # Confirm Unity activation
+      # Verify Unity license activation
       - name: Verify License Activation
         run: |
           if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
@@ -36,11 +36,14 @@ jobs:
             exit 1
           fi
 
-      # Install dependencies (if needed)
+      # Install dependencies for Wine (required for Windows builds)
       - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install -y wine64 xvfb
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y wine32 wine64 xvfb
 
-      # Run the Unity build
+      # Build the Windows player
       - name: Build Windows Player
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -54,3 +57,10 @@ jobs:
           -customBuildTarget StandaloneWindows64 \
           -customBuildPath "./Builds/Windows/MyGame.exe" \
           -logFile /dev/stdout
+
+      # Upload Build Artifacts
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: Windows Build
+          path: ./Builds/Windows/MyGame.exe
