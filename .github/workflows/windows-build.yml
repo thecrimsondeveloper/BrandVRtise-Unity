@@ -10,14 +10,14 @@ jobs:
     name: Build Windows
     runs-on: ubuntu-latest
     container:
-      image: unityci/editor:2023.2.3f1-base-0 # Use the Linux-compatible Unity editor image
+      image: unityci/editor:windows-2023.2.3f1-il2cpp-3.0.0
 
     steps:
       # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Activate Unity license
+      # Set up Unity license
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -26,7 +26,7 @@ jobs:
           mkdir -p ~/.local/share/unity3d/Unity
           mv Unity_lic.ulf ~/.local/share/unity3d/Unity
 
-      # Verify Unity license activation
+      # Confirm Unity activation
       - name: Verify License Activation
         run: |
           if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
@@ -36,20 +36,15 @@ jobs:
             exit 1
           fi
 
-      # Install dependencies for Wine (required for Windows builds)
+      # Install dependencies
       - name: Install Dependencies
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install -y wine32 wine64 xvfb
+        run: sudo apt-get update && sudo apt-get install -y wine64 xvfb
 
-      # Build the Windows player
+      # Run the Unity build
       - name: Build Windows Player
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 640x480x24" \
-          /opt/Unity/Editor/Unity \
+          /opt/unity/Editor/Unity \
           -batchmode \
           -quit \
           -projectPath "$(pwd)" \
@@ -57,10 +52,3 @@ jobs:
           -customBuildTarget StandaloneWindows64 \
           -customBuildPath "./Builds/Windows/MyGame.exe" \
           -logFile /dev/stdout
-
-      # Upload Build Artifacts
-      - name: Upload Windows Build
-        uses: actions/upload-artifact@v3
-        with:
-          name: Windows Build
-          path: ./Builds/Windows/MyGame.exe
