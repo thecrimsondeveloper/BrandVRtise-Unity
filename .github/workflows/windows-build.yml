@@ -1,4 +1,4 @@
-name: Unity Build Pipeline
+name: Unity License Debug Pipeline
 
 on:
   push:
@@ -9,49 +9,32 @@ on:
       - development
 
 jobs:
-  build:
+  debug-license:
     runs-on: ubuntu-latest
 
     steps:
-      # Step: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step: Debug Home Directory
-      - name: Debug Home Directory
-        run: |
-          echo "Current home directory:"
-          ls -alh ~
-
-      # Step: Create Unity License Directory
       - name: Create Unity License Directory
-        run: |
-          mkdir -p ~/.local/share/unity3d/Unity
-          echo "Unity license directory created."
+        run: mkdir -p ~/.local/share/unity3d/Unity
 
-      # Step: Output Unity License
-      - name: Output Unity License (Debug Only)
+      - name: Save Unity License File
         run: |
-          if [ -z "${{ secrets.UNITY_LICENSE }}" ]; then
-            echo "UNITY_LICENSE secret is not set!"
-            exit 1
+          echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > ~/.local/share/unity3d/Unity/Unity_lic.ulf
+          echo "Unity license file saved to ~/.local/share/unity3d/Unity/Unity_lic.ulf"
+          ls -alh ~/.local/share/unity3d/Unity
+
+      - name: Debug Unity License File
+        run: |
+          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
+            echo "Unity license file exists."
+            echo "License file content:"
+            cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
           else
-            echo "Decoded Unity License:"
-            echo "${{ secrets.UNITY_LICENSE }}" | base64 -d || echo "Failed to decode license."
+            echo "Unity license file is missing!"
           fi
 
-      # Step: Run Unity Build (Optional Debugging)
-      - name: Run Unity Build
-        uses: game-ci/unity-builder@v2
-        with:
-          projectPath: .
-          unityVersion: 2023.1.0f1
-          targetPlatform: StandaloneWindows64
-          buildName: MyUnityBuild
-          versioning: Semantic
-          dryRun: true # Prevents full build execution for debugging purposes
-
-      # Step: Debug Environment Variables
       - name: Debug Environment Variables
         run: |
           echo "Available environment variables:"
