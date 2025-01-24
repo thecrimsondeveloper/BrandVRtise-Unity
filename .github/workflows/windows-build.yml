@@ -1,4 +1,4 @@
-name: Unity License Debug Pipeline
+name: Unity Build Pipeline
 
 on:
   push:
@@ -9,43 +9,41 @@ on:
       - development
 
 jobs:
-  debug-license:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
+      # Step 1: Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Set up Unity Builder
-      - name: Unity Builder
-        uses: game-ci/unity-builder@v2
-        with:
-          unityVersion: 2022.3.30f1 # Specify Unity version
-          projectPath: BrandVRtise # Path to the Unity project folder
-          targetPlatform: StandaloneWindows64 # Specify the target platform
-          customParameters: -quit -batchmode -nographics # Optional custom Unity parameters
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      # Step 2: Decode and save Unity license
+      - name: Create Unity License File
+        run: |
+          echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > Unity_lic.ulf
+          mkdir -p ~/.local/share/unity3d/Unity/
+          mv Unity_lic.ulf ~/.local/share/unity3d/Unity/
 
-      # Debug Unity License File
+      # Step 3: Debug Unity License
       - name: Debug Unity License File
         run: |
           if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
-            echo "Unity license file exists."
-            echo "License file content:"
+            echo "Unity license file exists:"
             cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
           else
             echo "Unity license file is missing!"
           fi
 
-      # Verify Unity Version
-      - name: Verify Unity Version
-        run: |
-          unity-editor --version
+      # Step 4: Build the Unity project
+      - name: Build Unity Project
+        uses: game-ci/unity-builder@v2
+        with:
+          unityVersion: 2022.3.30f1 # Unity version
+          projectPath: BrandVRtise # Path to your Unity project folder
+          targetPlatform: StandaloneWindows64 # Build target (e.g., Android, iOS, Windows)
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
-      # Check Environment Variables
-      - name: Debug Environment Variables
-        run: |
-          echo "Available environment variables:"
-          printenv
+      # Step 5: Verify Unity installation
+      - name: Verify Unity Installation
+        run: unity-editor --version
