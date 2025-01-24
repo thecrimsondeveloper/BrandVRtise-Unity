@@ -16,6 +16,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Set Unity Editor Version
+        run: |
+          echo "Using Unity Editor version 6000.0.23f1"
+          echo "UNITY_VERSION=6000.0.23f1" >> $GITHUB_ENV
+
+      - name: Install Unity Editor
+        uses: game-ci/unity-installer@v2
+        with:
+          version: 6000.0.23f1
+
       - name: Create Unity License Directory
         run: mkdir -p ~/.local/share/unity3d/Unity
 
