@@ -1,0 +1,35 @@
+name: Build Windows
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual triggers
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Unity
+        uses: game-ci/unity-setup@v2
+        with:
+          unityVersion: 2021.3.16f1 # Match your Unity version
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build project
+        uses: game-ci/unity-builder@v2
+        with:
+          targetPlatform: StandaloneWindows64
+          projectPath: BrandVRtise # Your Unity project folder
+          buildName: BrandVRtise-Windows
+          versioning: Semantic
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: WindowsBuild
+          path: build/StandaloneWindows64/
