@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - development
-  pull_request:
-    branches:
-      - development
 
 jobs:
   build:
@@ -17,40 +14,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step: Verify Unity License Secret
-      - name: Verify Unity License Secret
-        run: |
-          if [ -z "${{ secrets.UNITY_LICENSE }}" ]; then
-            echo "UNITY_LICENSE secret is not set!" && exit 1
-          else
-            echo "UNITY_LICENSE secret is set."
-          fi
-
       # Step: Create Unity License File
       - name: Create Unity License File
         run: |
           mkdir -p ~/.local/share/unity3d/Unity
-          echo -e "${{ secrets.UNITY_LICENSE }}" > ~/.local/share/unity3d/Unity/Unity_lic.ulf
-
-      # Step: Debug License File Content
-      - name: Debug License File Content
-        run: |
-          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
-            echo "License file successfully created."
-            echo "License file content:"
-            cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
-          else
-            echo "License file missing." && exit 1
-          fi
-
-      # Step: Validate License File
-      - name: Validate License File
-        run: |
-          if xmllint --noout ~/.local/share/unity3d/Unity/Unity_lic.ulf 2>/dev/null; then
-            echo "License file is a valid XML."
-          else
-            echo "License file is not a valid XML." && exit 1
-          fi
+          echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > ~/.local/share/unity3d/Unity/Unity_lic.ulf
 
       # Step: Run Unity Build
       - name: Run Unity Build
@@ -61,11 +29,6 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildName: MyUnityBuild
           versioning: Semantic
-          androidKeystoreName: ${{ secrets.ANDROID_KEYSTORE_NAME }}
-          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
-          androidKeyAliasName: ${{ secrets.ANDROID_KEY_ALIAS_NAME }}
-          androidKeyAliasPass: ${{ secrets.ANDROID_KEY_ALIAS_PASS }}
 
       # Step: Upload Build Artifact
       - name: Upload Build Artifact
