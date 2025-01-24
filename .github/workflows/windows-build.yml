@@ -3,7 +3,7 @@ name: Build Windows
 on:
   push:
     branches:
-      - main
+      - builds # Trigger the workflow only on the `builds` branch
   workflow_dispatch: # Allows manual triggers
 
 jobs:
@@ -31,5 +31,5 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: WindowsBuild
-          path: build/StandaloneWindows64/
+          name: WindowsBuild # Artifact name
+          path: build/StandaloneWindows64/ # Path to the build folder
