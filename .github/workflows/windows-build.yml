@@ -1,4 +1,4 @@
-name: Unity Windows Build
+name: Unity License Test
 
 on:
   push:
@@ -6,20 +6,9 @@ on:
       - development
 
 jobs:
-  build-windows:
+  license-test:
     runs-on: windows-latest
     steps:
-      #- name: Checkout Repository
-      #  uses: actions/checkout@v3
-
-      #- name: Download Unity Editor
-      #  run: |
-      #    Invoke-WebRequest -Uri "https://download.unity3d.com/download_unity/21747dafc6ee/Windows64EditorInstaller/UnitySetup64-2023.2.3f1.exe" -OutFile UnitySetup.exe
-
-      #- name: Install Unity Editor
-      #  run: |
-      #    Start-Process -FilePath UnitySetup.exe -ArgumentList '/S /D=C:\Unity' -NoNewWindow -Wait
-
       #- name: Activate Unity License
       #  env:
       #    UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -28,18 +17,21 @@ jobs:
       #    mkdir -p $env:LOCALAPPDATA\Unity
       #    move Unity_lic.ulf $env:LOCALAPPDATA\Unity
 
-      - name: Echo License File
+      - name: Download Unity License File
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
-          echo "License XML:" 
-          echo "$env:UNITY_LICENSE" | base64 -d
+          echo "Downloading Unity license file..."
+          echo "$env:UNITY_LICENSE" > Unity_license.b64
+          echo "License file saved as Unity_license.b64."
 
-      #- name: Build Windows Player
-      #  run: |
-      #    "C:\Unity\Editor\Unity.exe" ^
-      #    -batchmode ^
-      #    -quit ^
-      #    -projectPath "${{ github.workspace }}" ^
-      #    -buildTarget Win64 ^
-      #    -customBuildTarget StandaloneWindows64 ^
-      #    -customBuildPath "./Builds/Windows/MyGame.exe" ^
-      #    -logFile "$(pwd)/UnityBuild.log"
+      - name: Convert License File to ULF
+        run: |
+          echo "Converting Unity license from Base64 to ULF format..."
+          certutil -decode Unity_license.b64 Unity_lic.ulf
+          echo "License converted and saved as Unity_lic.ulf."
+
+      - name: Output Decoded ULF File
+        run: |
+          echo "Decoded Unity license file content:"
+          type Unity_lic.ulf
