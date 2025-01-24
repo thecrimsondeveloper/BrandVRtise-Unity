@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -17,8 +16,10 @@ jobs:
       - name: Set up Unity
         uses: game-ci/unity-setup@v2
         with:
-          unityVersion: 6000.0.23f1
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          unityVersion: 2021.3.16f1 # Replace with your Unity version
+          activationEmail: ${{ secrets.UNITY_EMAIL }}
+          activationPassword: ${{ secrets.UNITY_PASSWORD }}
+          activationLicense: ${{ secrets.UNITY_SERIAL }} # Leave empty for Personal
 
       - name: Build project
         uses: game-ci/unity-builder@v2
