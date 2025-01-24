@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - development
+  pull_request:
+    branches:
+      - development
 
 jobs:
   build:
@@ -14,11 +17,40 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step: Create Unity License File
-      - name: Create Unity License File
+      # Step: Debug Home Directory
+      - name: Debug Home Directory
+        run: |
+          echo "Current home directory:"
+          ls -alh ~
+
+      # Step: Create Unity License Directory
+      - name: Create Unity License Directory
         run: |
           mkdir -p ~/.local/share/unity3d/Unity
+          echo "Unity license directory created."
+
+      # Step: Decode and Save Unity License
+      - name: Decode Unity License
+        run: |
           echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > ~/.local/share/unity3d/Unity/Unity_lic.ulf
+          echo "Unity license file saved at ~/.local/share/unity3d/Unity/Unity_lic.ulf"
+
+      # Step: Verify Unity License File
+      - name: Verify Unity License File
+        run: |
+          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
+            echo "Unity license file exists."
+            echo "License file content:"
+            cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
+          else
+            echo "Unity license file missing!" && exit 1
+          fi
+
+      # Step: Debug Environment Variables
+      - name: Debug Environment Variables
+        run: |
+          echo "Available environment variables:"
+          printenv
 
       # Step: Run Unity Build
       - name: Run Unity Build
