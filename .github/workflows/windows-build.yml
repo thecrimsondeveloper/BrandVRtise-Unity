@@ -12,29 +12,34 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Download Unity Editor
-        run: |
-          Invoke-WebRequest -Uri "https://download.unity3d.com/download_unity/21747dafc6ee/Windows64EditorInstaller/UnitySetup64-2023.2.3f1.exe" -OutFile UnitySetup.exe
+      #- name: Download Unity Editor
+      #  run: |
+      #    Invoke-WebRequest -Uri "https://download.unity3d.com/download_unity/21747dafc6ee/Windows64EditorInstaller/UnitySetup64-2023.2.3f1.exe" -OutFile UnitySetup.exe
 
-      - name: Install Unity Editor
-        run: |
-          Start-Process -FilePath UnitySetup.exe -ArgumentList '/S /D=C:\Unity' -NoNewWindow -Wait
+      #- name: Install Unity Editor
+      #  run: |
+      #    Start-Process -FilePath UnitySetup.exe -ArgumentList '/S /D=C:\Unity' -NoNewWindow -Wait
 
-      - name: Activate Unity License
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        run: |
-          echo "$env:UNITY_LICENSE" | base64 -d > Unity_lic.ulf
-          mkdir -p $env:LOCALAPPDATA\Unity
-          move Unity_lic.ulf $env:LOCALAPPDATA\Unity
+      #- name: Activate Unity License
+      #  env:
+      #    UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      #  run: |
+      #    echo "$env:UNITY_LICENSE" | base64 -d > Unity_lic.ulf
+      #    mkdir -p $env:LOCALAPPDATA\Unity
+      #    move Unity_lic.ulf $env:LOCALAPPDATA\Unity
 
-      - name: Build Windows Player
+      - name: Echo License File
         run: |
-          "C:\Unity\Editor\Unity.exe" ^
-          -batchmode ^
-          -quit ^
-          -projectPath "${{ github.workspace }}" ^
-          -buildTarget Win64 ^
-          -customBuildTarget StandaloneWindows64 ^
-          -customBuildPath "./Builds/Windows/MyGame.exe" ^
-          -logFile "$(pwd)/UnityBuild.log"
+          echo "License XML:" 
+          echo "$env:UNITY_LICENSE" | base64 -d
+
+      #- name: Build Windows Player
+      #  run: |
+      #    "C:\Unity\Editor\Unity.exe" ^
+      #    -batchmode ^
+      #    -quit ^
+      #    -projectPath "${{ github.workspace }}" ^
+      #    -buildTarget Win64 ^
+      #    -customBuildTarget StandaloneWindows64 ^
+      #    -customBuildPath "./Builds/Windows/MyGame.exe" ^
+      #    -logFile "$(pwd)/UnityBuild.log"
