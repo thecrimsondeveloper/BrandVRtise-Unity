@@ -1,34 +1,59 @@
-name: Build Windows EXE
+name: Unity Windows Build
 
 on:
   push:
     branches:
-      - development
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  build-windows:
+    name: Build Windows
     runs-on: ubuntu-latest
     container:
-      image: unityci/editor:2022.3.30f1-base-0
+      image: unityci/editor:windows-2023.2.3f1-base-0
 
     steps:
-      - name: Checkout repository
+      # Checkout the repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Set up Unity license (replace with your actual base64 license)
       - name: Activate Unity License
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
-          echo ${{ secrets.UNITY_LICENSE }} | base64 -d > unity.ulf
-          unity-editor \
-            -batchmode \
-            -manualLicenseFile unity.ulf \
-            -logfile /dev/stdout
+          echo "$UNITY_LICENSE" | base64 -d > Unity_lic.ulf
+          mkdir -p ~/.local/share/unity3d/Unity
+          mv Unity_lic.ulf ~/.local/share/unity3d/Unity
 
-      - name: Build Windows EXE
+      # Confirm Unity activation
+      - name: Verify License Activation
         run: |
-          unity-editor \
-            -batchmode \
-            -nographics \
-            -logfile /dev/stdout \
-            -projectPath ./YourUnityProject \
-            -buildTarget StandaloneWindows64 \
-            -buildPath ./Builds/WindowsBuild/MyGame.exe
+          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
+            echo "Unity license file exists and was applied successfully."
+          else
+            echo "License file is missing. Check UNITY_LICENSE in Secrets."
+            exit 1
+          fi
+
+      # Install dependencies (if needed)
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y wine64 xvfb
+
+      # Run the Unity build
+      - name: Build Windows Player
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 640x480x24" \
+          /opt/Unity/Editor/Unity \
+          -batchmode \
+          -quit \
+          -projectPath "$(pwd)" \
+          -buildTarget Win64 \
+          -customBuildTarget StandaloneWindows64 \
+          -customBuildPath "./Builds/Windows/MyGame.exe" \
+          -logFile /dev/stdout
