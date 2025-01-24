@@ -12,32 +12,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Chocolatey
+      - name: Install Unity Hub Manually
         run: |
-          powershell -NoProfile -ExecutionPolicy Bypass -Command "& {
-            if (!(Get-Command choco -ErrorAction SilentlyContinue)) {
-              [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
-              Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'));
-            } else {
-              Write-Host 'Chocolatey is already installed.';
-            }
-          }"
+          Invoke-WebRequest -Uri "https://public-cdn.cloud.unity3d.com/hub/nuo/UnityHubSetup.exe" -OutFile UnityHubSetup.exe
+          Start-Process UnityHubSetup.exe -ArgumentList "/S" -NoNewWindow -Wait
 
-      - name: Install Unity Hub
+      - name: Install Unity Editor Manually
         run: |
-          choco install unityhub --yes
-
-      - name: Install Unity Editor
-        run: |
-          "C:\Program Files\Unity Hub\UnityHub.exe" -- --headless install --version 2023.2.3f1 --module windows-mono
+          Invoke-WebRequest -Uri "https://download.unity3d.com/download_unity/your_editor_version/UnitySetup64.exe" -OutFile UnitySetup.exe
+          Start-Process UnitySetup.exe -ArgumentList "/S /D=C:\Unity" -NoNewWindow -Wait
 
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           echo "$env:UNITY_LICENSE" | base64 -d > Unity_lic.ulf
-          mkdir -p "$env:LOCALAPPDATA\Unity"
-          move Unity_lic.ulf "$env:LOCALAPPDATA\Unity"
+          mkdir -p $env:LOCALAPPDATA\Unity
+          move Unity_lic.ulf $env:LOCALAPPDATA\Unity
 
       - name: Build Windows Player
         run: |
