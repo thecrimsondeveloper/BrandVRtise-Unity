@@ -7,43 +7,27 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest # Use a Windows runner
-    container:
-      image: unityci/editor:windows-2023.2.3f1-windows-il2cpp-3.1.0 # Windows-based Docker image
-
+    runs-on: windows-latest
     steps:
-      # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Set up Unity license
+      - name: Install Unity
+        run: |
+          choco install unityhub --yes
+          unityhub install 2023.2.3f1
+
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           echo "$UNITY_LICENSE" | base64 -d > Unity_lic.ulf
-          mkdir -p ~/.local/share/unity3d/Unity
-          mv Unity_lic.ulf ~/.local/share/unity3d/Unity
+          mkdir -p "%LOCALAPPDATA%\Unity"
+          move Unity_lic.ulf "%LOCALAPPDATA%\Unity"
 
-      # Confirm Unity activation
-      - name: Verify License Activation
-        run: |
-          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
-            echo "Unity license file exists and was applied successfully."
-          else
-            echo "License file is missing. Check UNITY_LICENSE in Secrets."
-            exit 1
-          fi
-
-      # Install dependencies
-      - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install -y wine64 xvfb
-
-      # Run the Unity build
       - name: Build Windows Player
         run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 640x480x24" \
-          /opt/unity/Editor/Unity \
+          Unity.exe \
           -batchmode \
           -quit \
           -projectPath "$(pwd)" \
