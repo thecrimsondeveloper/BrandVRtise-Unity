@@ -20,7 +20,13 @@ jobs:
         with:
           projectPath: . # Path to your Unity project
           unityVersion: 6000.0.23f1 # Replace with your Unity version
-          targetPlatform: StandaloneWindows64 # Replace with your target platform (e.g., StandaloneWindows64, Android, WebGL, etc.)
+          targetPlatform: StandaloneWindows64 # Replace with your target platform (e.g., StandaloneWindows64, Android, WebGL)
+
+      # Activate Unity License from the secret
+      - name: Activate Unity License
+        run: |
+          mkdir -p ~/.local/share/unity3d/Unity
+          echo "${{ secrets.UNITY_LICENSE }}" > ~/.local/share/unity3d/Unity/Unity_lic.ulf
 
       # Optional: Upload build artifact
       - name: Upload Build
