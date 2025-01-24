@@ -12,11 +12,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Chocolatey (if not installed)
+        - name: Install Chocolatey
         run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force; \
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
-          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          powershell -NoProfile -ExecutionPolicy Bypass -Command "& {
+            if (!(Get-Command choco -ErrorAction SilentlyContinue)) {
+              [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+              Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'));
+            } else {
+              Write-Host 'Chocolatey is already installed.';
+            }
+          }"
+      
 
       - name: Install Unity Hub
         run: |
