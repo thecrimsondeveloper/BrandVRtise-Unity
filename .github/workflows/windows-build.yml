@@ -12,15 +12,13 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install Unity Hub Manually
+      - name: Download Unity Editor
         run: |
-          Invoke-WebRequest -Uri "https://public-cdn.cloud.unity3d.com/hub/nuo/UnityHubSetup.exe" -OutFile UnityHubSetup.exe
-          Start-Process UnityHubSetup.exe -ArgumentList "/S" -NoNewWindow -Wait
+          Invoke-WebRequest -Uri "https://download.unity3d.com/download_unity/3c3a3b3a3b3a/Windows64EditorInstaller/UnitySetup64-2023.2.3f1.exe" -OutFile UnitySetup.exe
 
-      - name: Install Unity Editor Manually
+      - name: Install Unity Editor
         run: |
-          Invoke-WebRequest -Uri "https://download.unity3d.com/download_unity/your_editor_version/UnitySetup64.exe" -OutFile UnitySetup.exe
-          Start-Process UnitySetup.exe -ArgumentList "/S /D=C:\Unity" -NoNewWindow -Wait
+          Start-Process -FilePath UnitySetup.exe -ArgumentList '/S /D=C:\Unity' -NoNewWindow -Wait
 
       - name: Activate Unity License
         env:
@@ -32,7 +30,7 @@ jobs:
 
       - name: Build Windows Player
         run: |
-          "C:\Program Files\Unity\Hub\Editor\2023.2.3f1\Editor\Unity.exe" ^
+          "C:\Unity\Editor\Unity.exe" ^
           -batchmode ^
           -quit ^
           -projectPath "${{ github.workspace }}" ^
