@@ -1,4 +1,4 @@
-name: Unity License Debug Pipeline
+name: Unity Build Pipeline
 
 on:
   push:
@@ -9,40 +9,32 @@ on:
       - development
 
 jobs:
-  debug-license:
+  build:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      # Step 2: Create Unity License Directory
       - name: Create Unity License Directory
         run: mkdir -p ~/.local/share/unity3d/Unity
 
+      # Step 3: Save Unity License File
       - name: Save Unity License File
         run: |
           echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > ~/.local/share/unity3d/Unity/Unity_lic.ulf
           echo "Unity license file saved to ~/.local/share/unity3d/Unity/Unity_lic.ulf"
           ls -alh ~/.local/share/unity3d/Unity
 
-      - name: Install Unity
-        uses: game-ci/unity-installer@v3
+      # Step 4: Use Unity Builder to build the project
+      - name: Build with Unity Builder
+        uses: game-ci/unity-builder@v2
         with:
-          unityVersion: "6000.0.23f1" # Update to match your Unity version
-          components: android
-          activationFile: ~/.local/share/unity3d/Unity/Unity_lic.ulf
-
-      - name: Debug Unity License File
-        run: |
-          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
-            echo "Unity license file exists."
-            echo "License file content:"
-            cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
-          else
-            echo "Unity license file is missing!"
-          fi
-
-      - name: Debug Environment Variables
-        run: |
-          echo "Available environment variables:"
-          printenv
+          unityVersion: "6000.0.23f1" # Your Unity version
+          targetPlatform: StandaloneLinux64 # Change to your desired platform (e.g., Android, iOS, WebGL, etc.)
+          projectPath: . # Path to your Unity project, adjust if it's not in the root
+          customParameters: -buildTarget Linux64 # Add any custom parameters here
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
