@@ -7,10 +7,9 @@ on:
 
 jobs:
   build-windows:
-    name: Build Windows
-    runs-on: ubuntu-latest
+    runs-on: windows-latest # Use a Windows runner
     container:
-      image: unityci/editor:windows-2023.2.3f1-windows-il2cpp-3.1.0
+      image: unityci/editor:windows-2023.2.3f1-windows-il2cpp-3.1.0 # Windows-based Docker image
 
     steps:
       # Checkout the repository
