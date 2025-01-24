@@ -25,12 +25,12 @@ jobs:
           echo "Unity license file saved to ~/.local/share/unity3d/Unity/Unity_lic.ulf"
           ls -alh ~/.local/share/unity3d/Unity
 
-      - name: Install Unity 6
-        uses: unity-ci/docker@v1
+      - name: Install Unity
+        uses: game-ci/unity-installer@v3
         with:
-          unityVersion: "6000.0.23f1" # Replace this with your Unity 6 version
-          workspace: ${{ github.workspace }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          unityVersion: "6000.0.23f1" # Update to match your Unity version
+          components: android
+          activationFile: ~/.local/share/unity3d/Unity/Unity_lic.ulf
 
       - name: Debug Unity License File
         run: |
