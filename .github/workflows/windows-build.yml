@@ -61,12 +61,12 @@ jobs:
       - name: Build Windows Player
         run: |
           echo "Starting Unity build..."
-          "C:\Unity\Editor\Unity.exe" ^
-          -batchmode ^
-          -quit ^
-          -projectPath "${{ github.workspace }}" ^
-          -buildTarget Win64 ^
-          -customBuildTarget StandaloneWindows64 ^
-          -customBuildPath "./Builds/Windows/MyGame.exe" ^
+          "C:\Unity\Editor\Unity.exe" `
+          -batchmode `
+          -quit `
+          -projectPath "${{ github.workspace }}" `
+          -buildTarget Win64 `
+          -customBuildTarget StandaloneWindows64 `
+          -customBuildPath "./Builds/Windows/MyGame.exe" `
           -logFile "$(pwd)/UnityBuild.log"
           echo "Unity build completed successfully."
