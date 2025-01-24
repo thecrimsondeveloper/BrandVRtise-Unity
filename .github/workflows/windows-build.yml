@@ -13,7 +13,7 @@ jobs:
     name: Build Windows
     runs-on: ubuntu-latest
     container:
-      image: unityci/editor:windows-2023.2.3f1-base-0
+      image: unityci/editor:windows-2023.2.3f1-android-3.0.0
 
     steps:
       # Checkout the repository
