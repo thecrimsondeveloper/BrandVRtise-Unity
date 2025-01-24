@@ -14,30 +14,51 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Activate Unity License
-      - name: Activate Unity License
+      # Step 2: Debug GitHub Secrets
+      - name: Debug GitHub Secrets
+        run: |
+          echo "Checking Unity license secret..."
+          if [ -z "${{ secrets.UNITY_LICENSE }}" ]; then
+            echo "UNITY_LICENSE secret is not set!" && exit 1
+          else
+            echo "UNITY_LICENSE secret is set."
+          fi
+
+      # Step 3: Create Unity License File
+      - name: Create Unity License File
         run: |
           mkdir -p ~/.local/share/unity3d/Unity
           echo "${{ secrets.UNITY_LICENSE }}" > ~/.local/share/unity3d/Unity/Unity_lic.ulf
 
-      # Step 3: Verify Unity License File (Optional Debug Step)
-      - name: Verify Unity License File
+      # Step 4: Debug License File Contents
+      - name: Debug Unity License File Contents
         run: |
           if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
             echo "License file successfully created."
+            echo "License file contents:"
+            cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
           else
             echo "License file missing." && exit 1
           fi
 
-      # Step 4: Set up Unity Builder
+      # Step 5: Debug License File Formatting
+      - name: Debug Unity License File Formatting
+        run: |
+          if xmllint --noout ~/.local/share/unity3d/Unity/Unity_lic.ulf 2>/dev/null; then
+            echo "License file is a valid XML."
+          else
+            echo "License file is not a valid XML." && exit 1
+          fi
+
+      # Step 6: Set up Unity Builder
       - name: Unity Builder
         uses: game-ci/unity-builder@v2
         with:
-          projectPath: . # Path to your Unity project
+          projectPath: .
           unityVersion: 6000.0.23f1 # Replace with your Unity version
           targetPlatform: StandaloneWindows64 # Replace with your target platform (e.g., StandaloneWindows64, Android, WebGL, etc.)
 
-      # Step 5: Upload Build Artifacts
+      # Step 7: Upload Build Artifacts
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
