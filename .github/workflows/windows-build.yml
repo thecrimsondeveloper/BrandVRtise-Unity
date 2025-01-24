@@ -1,4 +1,4 @@
-name: Unity Build Pipeline
+name: Unity License Debug Pipeline
 
 on:
   push:
@@ -9,32 +9,43 @@ on:
       - development
 
 jobs:
-  build:
+  debug-license:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Checkout the repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Create Unity License Directory
-      - name: Create Unity License Directory
-        run: mkdir -p ~/.local/share/unity3d/Unity
-
-      # Step 3: Save Unity License File
-      - name: Save Unity License File
-        run: |
-          echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > ~/.local/share/unity3d/Unity/Unity_lic.ulf
-          echo "Unity license file saved to ~/.local/share/unity3d/Unity/Unity_lic.ulf"
-          ls -alh ~/.local/share/unity3d/Unity
-
-      # Step 4: Use Unity Builder to build the project
-      - name: Build with Unity Builder
+      # Set up Unity Builder
+      - name: Unity Builder
         uses: game-ci/unity-builder@v2
         with:
-          unityVersion: "6000.0.23f1" # Your Unity version
-          targetPlatform: StandaloneLinux64 # Change to your desired platform (e.g., Android, iOS, WebGL, etc.)
-          projectPath: BrandVRtise
-          customParameters: -buildTarget Linux64 # Add any custom parameters here
+          unityVersion: 2022.3.30f1 # Specify Unity version
+          projectPath: BrandVRtise # Path to the Unity project folder
+          targetPlatform: StandaloneWindows64 # Specify the target platform
+          customParameters: -quit -batchmode -nographics # Optional custom Unity parameters
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      # Debug Unity License File
+      - name: Debug Unity License File
+        run: |
+          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
+            echo "Unity license file exists."
+            echo "License file content:"
+            cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
+          else
+            echo "Unity license file is missing!"
+          fi
+
+      # Verify Unity Version
+      - name: Verify Unity Version
+        run: |
+          unity-editor --version
+
+      # Check Environment Variables
+      - name: Debug Environment Variables
+        run: |
+          echo "Available environment variables:"
+          printenv
