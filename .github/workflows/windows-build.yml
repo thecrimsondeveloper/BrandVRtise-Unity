@@ -34,7 +34,7 @@ jobs:
         with:
           unityVersion: "6000.0.23f1" # Your Unity version
           targetPlatform: StandaloneLinux64 # Change to your desired platform (e.g., Android, iOS, WebGL, etc.)
-          projectPath: . # Path to your Unity project, adjust if it's not in the root
+          projectPath: BrandVRtise
           customParameters: -buildTarget Linux64 # Add any custom parameters here
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
