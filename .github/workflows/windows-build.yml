@@ -13,16 +13,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Install Unity Editor
-      - name: Download and Install Unity Editor
+      # Step 2: Download Unity Editor Installer
+      - name: Download Unity Editor Installer
         run: |
-          # Download Unity Editor directly from the official Unity URL
           curl -o UnitySetup.exe "https://download.unity3d.com/download_unity/8f7c6f9c4d5e/Windows64EditorInstaller/UnitySetup64.exe"
 
-          # Install Unity silently
-          start /wait UnitySetup.exe /S /D=C:\Unity
+      # Step 3: Install Unity Editor
+      - name: Install Unity Editor
+        run: |
+          .\UnitySetup.exe /S /D=C:\Unity
 
-      # Step 3: Activate Unity License
+      # Step 4: Activate Unity License
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -31,7 +32,7 @@ jobs:
           mkdir -p "%LOCALAPPDATA%\Unity"
           move Unity_lic.ulf "%LOCALAPPDATA%\Unity"
 
-      # Step 4: Build Windows Player
+      # Step 5: Build Windows Player
       - name: Build Windows Player
         run: |
           C:\Unity\Editor\Unity.exe ^
