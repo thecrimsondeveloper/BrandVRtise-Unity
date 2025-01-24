@@ -3,38 +3,41 @@ name: Unity Build
 on:
   push:
     branches:
-      - development
+      - builds
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout your code
+      # Step 1: Checkout your repository code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Set up Unity Builder
-      - name: Unity Builder
-        uses: game-ci/unity-builder@v2
-        with:
-          projectPath: . # Path to your Unity project
-          unityVersion: 6000.0.23f1 # Replace with your Unity version
-          targetPlatform: StandaloneWindows64 # Replace with your target platform
-
-      # Activate Unity License from the secret
+      # Step 2: Activate Unity License
       - name: Activate Unity License
         run: |
           mkdir -p ~/.local/share/unity3d/Unity
           echo "${{ secrets.UNITY_LICENSE }}" > ~/.local/share/unity3d/Unity/Unity_lic.ulf
 
-      # Check if the Unity license file exists
-      - name: Check Unity License File Location
+      # Step 3: Verify Unity License File (Optional Debug Step)
+      - name: Verify Unity License File
         run: |
-          echo "Listing contents of the Unity license directory:"
-          ls -la ~/.local/share/unity3d/Unity
+          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
+            echo "License file successfully created."
+          else
+            echo "License file missing." && exit 1
+          fi
 
-      # Optional: Upload build artifact
+      # Step 4: Set up Unity Builder
+      - name: Unity Builder
+        uses: game-ci/unity-builder@v2
+        with:
+          projectPath: . # Path to your Unity project
+          unityVersion: 6000.0.23f1 # Replace with your Unity version
+          targetPlatform: StandaloneWindows64 # Replace with your target platform (e.g., StandaloneWindows64, Android, WebGL, etc.)
+
+      # Step 5: Upload Build Artifacts
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
