@@ -1,68 +1,34 @@
-name: Unity Build Pipeline
+name: Build Windows EXE
 
 on:
   push:
     branches:
-      - development
-  pull_request:
-    branches:
-      - development
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: unityci/editor:2022.3.30f1-base-0
 
     steps:
-      # Step 1: Verify Docker Installation
-      - name: Verify Docker Installation
-        run: |
-          docker --version
-          docker info
-
-      # Step 2: Checkout Repository
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 3: Create Unity License File
-      - name: Create Unity License File
+      - name: Activate Unity License
         run: |
-          echo "${{ secrets.UNITY_LICENSE }}" | base64 -d > Unity_lic.ulf
-          mkdir -p ~/.local/share/unity3d/Unity/
-          mv Unity_lic.ulf ~/.local/share/unity3d/Unity/
-          echo "Unity license file has been created and moved to the Unity license directory."
+          echo ${{ secrets.UNITY_LICENSE }} | base64 -d > unity.ulf
+          unity-editor \
+            -batchmode \
+            -manualLicenseFile unity.ulf \
+            -logfile /dev/stdout
 
-      # Step 4: Debug Unity License File
-      - name: Debug Unity License File
+      - name: Build Windows EXE
         run: |
-          if [ -f ~/.local/share/unity3d/Unity/Unity_lic.ulf ]; then
-            echo "Unity license file exists. Contents:"
-            cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
-          else
-            echo "Unity license file is missing!"
-          fi
-
-      # Step 5: Pull Unity Builder Docker Image
-      - name: Pull Unity Builder Image
-        run: docker pull unityci/editor:2022.3.30f1-windows
-
-      # Step 6: Debug Docker Logs (optional)
-      - name: Debug Docker Logs
-        run: |
-          docker run --rm unityci/editor:2022.3.30f1-windows --version
-
-      # Step 7: Build the Unity Project
-      - name: Build Unity Project
-        uses: game-ci/unity-builder@v2
-        with:
-          unityVersion: 2022.3.30f1 # Unity version
-          projectPath: BrandVRtise # Path to your Unity project folder
-          targetPlatform: StandaloneWindows64 # Build target
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-
-      # Step 8: Upload Build Artifacts (optional)
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: Build
-          path: build/StandaloneWindows64/
+          unity-editor \
+            -batchmode \
+            -nographics \
+            -logfile /dev/stdout \
+            -projectPath ./YourUnityProject \
+            -buildTarget StandaloneWindows64 \
+            -buildPath ./Builds/WindowsBuild/MyGame.exe
