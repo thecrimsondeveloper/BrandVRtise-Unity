@@ -17,7 +17,7 @@ jobs:
       - name: Set up Unity
         uses: game-ci/unity-setup@v2
         with:
-          unityVersion: 6000.0.23f1 # Match your Unity version
+          unityVersion: 6000.0.23f1
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build project
