@@ -9,37 +9,38 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      # Step 1: Checkout Repository
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Step 2: Download Unity Editor Installer
-      - name: Download Unity Editor Installer
+      - name: Install Chocolatey (if not installed)
         run: |
-          curl -o UnitySetup.exe "https://download.unity3d.com/download_unity/8f7c6f9c4d5e/Windows64EditorInstaller/UnitySetup64.exe"
+          Set-ExecutionPolicy Bypass -Scope Process -Force; \
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
+          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-      # Step 3: Install Unity Editor
+      - name: Install Unity Hub
+        run: |
+          choco install unityhub --yes
+
       - name: Install Unity Editor
         run: |
-          .\UnitySetup.exe /S /D=C:\Unity
+          unityhub -- --headless install --version 2023.2.3f1 --module windows-mono
 
-      # Step 4: Activate Unity License
       - name: Activate Unity License
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
-          echo "$UNITY_LICENSE" | base64 -d > Unity_lic.ulf
-          mkdir -p "%LOCALAPPDATA%\Unity"
-          move Unity_lic.ulf "%LOCALAPPDATA%\Unity"
+          echo "$env:UNITY_LICENSE" | base64 -d > Unity_lic.ulf
+          mkdir -p $env:LOCALAPPDATA\Unity
+          move Unity_lic.ulf $env:LOCALAPPDATA\Unity
 
-      # Step 5: Build Windows Player
       - name: Build Windows Player
         run: |
-          C:\Unity\Editor\Unity.exe ^
+          "C:\Program Files\Unity\Hub\Editor\2023.2.3f1\Editor\Unity.exe" ^
           -batchmode ^
           -quit ^
-          -projectPath "$(pwd)" ^
+          -projectPath "${{ github.workspace }}" ^
           -buildTarget Win64 ^
           -customBuildTarget StandaloneWindows64 ^
           -customBuildPath "./Builds/Windows/MyGame.exe" ^
-          -logFile ./unity-build.log
+          -logFile "$(pwd)/UnityBuild.log"
