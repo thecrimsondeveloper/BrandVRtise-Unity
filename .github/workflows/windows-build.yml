@@ -16,7 +16,7 @@ jobs:
       - name: Set up Unity
         uses: game-ci/unity-setup@v2
         with:
-          unityVersion: 2021.3.16f1 # Replace with your Unity version
+          unityVersion: 6000.0.23f1 # Replace with your Unity version
           activationEmail: ${{ secrets.UNITY_EMAIL }}
           activationPassword: ${{ secrets.UNITY_PASSWORD }}
           activationLicense: ${{ secrets.UNITY_SERIAL }} # Leave empty for Personal
