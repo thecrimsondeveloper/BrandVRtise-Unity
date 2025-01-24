@@ -3,7 +3,7 @@ name: Unity Build
 on:
   push:
     branches:
-      - builds
+      - development
 
 jobs:
   build:
